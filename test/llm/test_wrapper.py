@@ -1722,7 +1722,7 @@ class TestDistributionMethods:
 
 
 @pytest.mark.skipif(not _has_transformers, reason="transformers not available")
-@pytest.mark.parametrize("pad_output", [True, False])
+@pytest.mark.parametrize("pad_output", [False, True])
 class TestPacking:
     def test_packing_history(
         self, transformers_instance, sample_history_assistant, pad_output
@@ -1752,8 +1752,8 @@ class TestPacking:
             {"history": ChatHistory(full=sample_history_assistant)}, batch_size=(2,)
         ).to_lazystack(0)
 
-        result_packed = wrapper_packed(td)
         result_padded = wrapped_padded(td)
+        result_packed = wrapper_packed(td)
         assert_close(result_packed["log_probs"], result_padded["log_probs"])
 
     def test_packing_text(self, transformers_instance, sample_text, pad_output):
@@ -1776,9 +1776,7 @@ class TestPacking:
             pad_output=pad_output,
             pad_model_input=True,
         )
-        td = TensorDict({"text": Text(full=sample_text)}, batch_size=(2,)).to_lazystack(
-            0
-        )
+        td = TensorDict({"text": Text(full=sample_text)}, batch_size=(2,))
         result_packed = wrapper_packed(td)
         result_padded = wrapped_padded(td)
         assert_close(result_packed["log_probs"], result_padded["log_probs"])
@@ -1812,8 +1810,8 @@ class TestPacking:
             },
             batch_size=(2,),
         ).to_lazystack(0)
-        result_packed = wrapper_packed(td)
         result_padded = wrapped_padded(td)
+        result_packed = wrapper_packed(td)
         assert_close(result_packed["log_probs"], result_padded["log_probs"])
 
 

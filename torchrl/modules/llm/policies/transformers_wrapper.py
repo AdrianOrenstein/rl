@@ -2017,7 +2017,7 @@ class TransformersWrapper(LLMWrapperBase):
         return log_probs_full_padded, logits_full_padded
 
     def _model_forward_with_packed_sequences(
-        self, flat_input_ids, block_diag_attention_mask, pad: bool = True, **kwargs
+        self, flat_input_ids, attention_mask, pad: bool = True, **kwargs
     ):
         """Pack sequences into a single tensor and forward them through the model.
 
@@ -2033,7 +2033,7 @@ class TransformersWrapper(LLMWrapperBase):
             flat_input_ids,
             block_diag_attention_mask,
             packing_metadata,
-        ) = self._pack_sequences(flat_input_ids, block_diag_attention_mask)
+        ) = self._pack_sequences(flat_input_ids, attention_mask)
         # check shapes: [B, L] for input_ids, [B, L, L] for attention_mask
         if flat_input_ids.shape != block_diag_attention_mask.shape[:2]:
             raise ValueError(
@@ -2045,7 +2045,7 @@ class TransformersWrapper(LLMWrapperBase):
             )
         outputs = self.model(
             input_ids=flat_input_ids,
-            attention_mask=block_diag_attention_mask,
+            attention_mask=block_diag_attention_mask.unsqueeze(0),
             position_ids=packing_metadata["position_ids"],
             use_cache=False,  # Disable KV cache for packing
             **kwargs,
